@@ -24,41 +24,57 @@ class ClockIcon:
         self.icon.icon = self.create_image()
 
     def create_image(self):
-        """Creates the icon image with the current time, ensuring legibility and proper alignment."""
-        width, height = 64, 64  # Optimized resolution
+        """Creates the icon image with the current time, ensuring maximum readability and alignment."""
+        width, height = 64, 64  # Optimized resolution for taskbar visibility
         image = Image.new('RGBA', (width, height), (0, 0, 0, 0))
         draw = ImageDraw.Draw(image)
 
         try:
-            font_size = 30
-            font = ImageFont.truetype("arial.ttf", font_size)
+            font_size_hour = 28  # Balanced size for hour
+            font_size_minute = 26  # Slightly smaller to ensure full visibility
+            font_hour = ImageFont.truetype("arial.ttf", font_size_hour)
+            font_minute = ImageFont.truetype("arial.ttf", font_size_minute)
         except IOError:
-            font = ImageFont.load_default()
+            font_hour = ImageFont.load_default()
+            font_minute = ImageFont.load_default()
 
-        # Format time without AM/PM
-        time_text = datetime.now().strftime("%I:%M").lstrip('0')
+        # Separate hour and minutes
+        hour_text = datetime.now().strftime("%I").lstrip('0')
+        minute_text = datetime.now().strftime("%M")
 
-        # Get text bounding box to ensure proper placement
-        bbox = draw.textbbox((0, 0), time_text, font=font)
-        text_width = bbox[2] - bbox[0]
-        text_height = bbox[3] - bbox[1]
+        # Get text bounding boxes
+        hour_bbox = draw.textbbox((0, 0), hour_text, font=font_hour)
+        minute_bbox = draw.textbbox((0, 0), minute_text, font=font_minute)
 
-        # Ensure text fits by dynamically reducing font size
-        while text_width > width - 8:
-            font_size -= 1
+        hour_width = hour_bbox[2] - hour_bbox[0]
+        hour_height = hour_bbox[3] - hour_bbox[1]
+        minute_width = minute_bbox[2] - minute_bbox[0]
+        minute_height = minute_bbox[3] - minute_bbox[1]
+
+        # Adjust font size dynamically if needed
+        while hour_width > width - 8 or minute_width > width - 8:
+            font_size_hour -= 2
+            font_size_minute -= 2
             try:
-                font = ImageFont.truetype("arial.ttf", font_size)
+                font_hour = ImageFont.truetype("segoeui.ttf", font_size_hour)
+                font_minute = ImageFont.truetype("segoeui.ttf", font_size_minute)
             except IOError:
-                font = ImageFont.load_default()
-            bbox = draw.textbbox((0, 0), time_text, font=font)
-            text_width = bbox[2] - bbox[0]
-            text_height = bbox[3] - bbox[1]
+                font_hour = ImageFont.load_default()
+                font_minute = ImageFont.load_default()
+            hour_bbox = draw.textbbox((0, 0), hour_text, font=font_hour)
+            minute_bbox = draw.textbbox((0, 0), minute_text, font=font_minute)
+            hour_width = hour_bbox[2] - hour_bbox[0]
+            minute_width = minute_bbox[2] - minute_bbox[0]
 
-        # Center text properly
-        x = (width - text_width) // 2
-        y = (height - text_height) // 2
+        # Position hour at the top and minutes lower down, optimizing space
+        x_hour = (width - hour_width) // 2
+        y_hour = (height // 3) - (hour_height // 3)  # Increased proximity
 
-        draw.text((x, y), time_text, font=font, fill="white")
+        x_minute = (width - minute_width) // 2
+        y_minute = (2 * height // 3) - (minute_height // 5)  # Adjusted slightly higher
+
+        draw.text((x_hour, y_hour), hour_text, font=font_hour, fill="white")
+        draw.text((x_minute, y_minute), minute_text, font=font_minute, fill="white")
 
         gc.collect()  # Force memory cleanup
 
@@ -68,7 +84,7 @@ class ClockIcon:
         """Updates the icon every minute while ensuring minimal memory usage."""
         while self.running:
             self.icon.icon = self.create_image()
-            self.icon.title = datetime.now().strftime("%I:%M").lstrip('0')
+            self.icon.title = datetime.now().strftime("%I:%M").lstrip('0')  # Consistent title format
             gc.collect()  # Cleanup memory every cycle
             time.sleep(60 - datetime.now().second)
 
