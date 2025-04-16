@@ -24,7 +24,7 @@ To build TinyClock successfully, make sure you have Python installed along with 
 ### 🔹 Install dependencies
 Run the following command to install all required Python packages:
 ```bash
-pip install pystray pillow psutil
+pip install pystray pillow
 ```
 🔹 Generate the .exe
 Once the dependencies are installed, run:
