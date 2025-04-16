@@ -1,5 +1,6 @@
 # TinyClock ⏳
 **TinyClock** is a minimalist clock for the Windows system tray.
+The tiniest clock you've ever seen! (so tiny you can barely see it).
 
 ## 🚀 Features
 - Displays the time in 12-hour format (without AM/PM)
