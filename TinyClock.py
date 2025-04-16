@@ -24,59 +24,30 @@ class ClockIcon:
         self.icon.icon = self.create_image()
 
     def create_image(self):
-        """Creates the icon image with the current time, ensuring maximum readability and alignment."""
-        width, height = 64, 64  # Optimized resolution for taskbar visibility
+        """Creates the icon image with equal-sized hours and minutes, ensuring maximum readability in 24x24 px."""
+        width, height = 24, 24  # Optimized for taskbar space
         image = Image.new('RGBA', (width, height), (0, 0, 0, 0))
         draw = ImageDraw.Draw(image)
 
         try:
-            font_size_hour = 28  # Balanced size for hour
-            font_size_minute = 26  # Slightly smaller to ensure full visibility
-            font_hour = ImageFont.truetype("arial.ttf", font_size_hour)
-            font_minute = ImageFont.truetype("arial.ttf", font_size_minute)
+            font_size = 12  # Balanced size for both numbers
+            font = ImageFont.truetype("segoeui.ttf", font_size)
         except IOError:
-            font_hour = ImageFont.load_default()
-            font_minute = ImageFont.load_default()
+            font = ImageFont.load_default()
 
-        # Separate hour and minutes
+        # Extract hour and minutes
         hour_text = datetime.now().strftime("%I").lstrip('0')
         minute_text = datetime.now().strftime("%M")
 
-        # Get text bounding boxes
-        hour_bbox = draw.textbbox((0, 0), hour_text, font=font_hour)
-        minute_bbox = draw.textbbox((0, 0), minute_text, font=font_minute)
+        # Position text in two balanced rows
+        x = width // 2
+        y_hour = 3  # Slightly adjusted for better positioning
+        y_minute = height // 2 + 3
 
-        hour_width = hour_bbox[2] - hour_bbox[0]
-        hour_height = hour_bbox[3] - hour_bbox[1]
-        minute_width = minute_bbox[2] - minute_bbox[0]
-        minute_height = minute_bbox[3] - minute_bbox[1]
+        draw.text((x, y_hour), hour_text, font=font, fill="white", anchor="mm")
+        draw.text((x, y_minute), minute_text, font=font, fill="white", anchor="mm")
 
-        # Adjust font size dynamically if needed
-        while hour_width > width - 8 or minute_width > width - 8:
-            font_size_hour -= 2
-            font_size_minute -= 2
-            try:
-                font_hour = ImageFont.truetype("segoeui.ttf", font_size_hour)
-                font_minute = ImageFont.truetype("segoeui.ttf", font_size_minute)
-            except IOError:
-                font_hour = ImageFont.load_default()
-                font_minute = ImageFont.load_default()
-            hour_bbox = draw.textbbox((0, 0), hour_text, font=font_hour)
-            minute_bbox = draw.textbbox((0, 0), minute_text, font=font_minute)
-            hour_width = hour_bbox[2] - hour_bbox[0]
-            minute_width = minute_bbox[2] - minute_bbox[0]
-
-        # Position hour at the top and minutes lower down, optimizing space
-        x_hour = (width - hour_width) // 2
-        y_hour = (height // 3) - (hour_height // 3)  # Increased proximity
-
-        x_minute = (width - minute_width) // 2
-        y_minute = (2 * height // 3) - (minute_height // 5)  # Adjusted slightly higher
-
-        draw.text((x_hour, y_hour), hour_text, font=font_hour, fill="white")
-        draw.text((x_minute, y_minute), minute_text, font=font_minute, fill="white")
-
-        gc.collect()  # Force memory cleanup
+        gc.collect()  # Memory optimization
 
         return image
 
