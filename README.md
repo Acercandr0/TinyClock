@@ -3,7 +3,7 @@
   <h1>TinyClock</h1>
   <p><strong>TinyClock</strong> is a minimalist clock for the Windows system tray.<br>
   The tiniest clock you've ever seen! (so tiny you can barely see it).</p>
-  <img src="https://github.com/user-attachments/assets/7ca9fdce-f61f-4f97-b7c4-44f2de2cf599" alt="image" />
+  <img src="https://github.com/user-attachments/assets/68bc36e8-1092-44c9-ae74-0b9f8422b24f" alt="image" />
 </div>
 
 ## 🚀 Features
