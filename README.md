@@ -19,6 +19,14 @@
 Right-click the tray icon and select **"Start with Windows"**.
 
 ## 🛠 Build the executable
-To generate your own `.exe`, use:
+To build TinyClock successfully, make sure you have Python installed along with the required dependencies.
+
+### 🔹 Install dependencies
+Run the following command to install all required Python packages:
+```bash
+pip install pystray pillow psutil
+```
+🔹 Generate the .exe
+Once the dependencies are installed, run:
 ```bash
 pyinstaller --onefile --windowed --icon=icon.ico TinyClock.py
