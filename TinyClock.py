@@ -1,6 +1,7 @@
 import time
 import os
 import sys
+import gc
 from datetime import datetime
 from PIL import Image, ImageDraw, ImageFont
 import pystray
@@ -11,8 +12,7 @@ class ClockIcon:
     def __init__(self):
         self.icon = pystray.Icon("TinyClock")
         self.running = True
-        self.update_thread = threading.Thread(target=self.update_time)
-        self.update_thread.daemon = True
+        self.update_thread = threading.Thread(target=self.update_time, daemon=True)
 
         # Create menu with an auto-start option
         self.icon.menu = pystray.Menu(
@@ -24,13 +24,13 @@ class ClockIcon:
         self.icon.icon = self.create_image()
 
     def create_image(self):
-        """Creates the icon image with the current time, ensuring legibility."""
-        width, height = 128, 128
+        """Creates the icon image with the current time, ensuring legibility and proper alignment."""
+        width, height = 64, 64  # Optimized resolution
         image = Image.new('RGBA', (width, height), (0, 0, 0, 0))
         draw = ImageDraw.Draw(image)
 
         try:
-            font_size = 60
+            font_size = 30
             font = ImageFont.truetype("arial.ttf", font_size)
         except IOError:
             font = ImageFont.load_default()
@@ -38,14 +38,14 @@ class ClockIcon:
         # Format time without AM/PM
         time_text = datetime.now().strftime("%I:%M").lstrip('0')
 
-        # Get text bounding box to ensure all digits are visible
+        # Get text bounding box to ensure proper placement
         bbox = draw.textbbox((0, 0), time_text, font=font)
         text_width = bbox[2] - bbox[0]
         text_height = bbox[3] - bbox[1]
 
-        # Adjust font size dynamically if needed
-        while text_width > width - 10:
-            font_size -= 2
+        # Ensure text fits by dynamically reducing font size
+        while text_width > width - 8:
+            font_size -= 1
             try:
                 font = ImageFont.truetype("arial.ttf", font_size)
             except IOError:
@@ -54,18 +54,22 @@ class ClockIcon:
             text_width = bbox[2] - bbox[0]
             text_height = bbox[3] - bbox[1]
 
+        # Center text properly
         x = (width - text_width) // 2
         y = (height - text_height) // 2
 
         draw.text((x, y), time_text, font=font, fill="white")
 
+        gc.collect()  # Force memory cleanup
+
         return image
 
     def update_time(self):
-        """Updates the icon every minute."""
+        """Updates the icon every minute while ensuring minimal memory usage."""
         while self.running:
             self.icon.icon = self.create_image()
-            self.icon.title = datetime.now().strftime("%I:%M").lstrip('0')  # Keep format without AM/PM
+            self.icon.title = datetime.now().strftime("%I:%M").lstrip('0')
+            gc.collect()  # Cleanup memory every cycle
             time.sleep(60 - datetime.now().second)
 
     def toggle_startup(self):
@@ -110,6 +114,7 @@ class ClockIcon:
         """Closes the application."""
         self.running = False
         self.icon.stop()
+        gc.collect()  # Cleanup memory on exit
 
 if __name__ == "__main__":
     clock = ClockIcon()
