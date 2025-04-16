@@ -9,7 +9,6 @@
 ## 🚀 Features
 - Displays the time in 12-hour format (without AM/PM)
 - Can be configured to automatically start with Windows
-- Automatic translation based on system language (in testing)
 
 ## 📦 Installation
 1. Download `TinyClock.exe` from [GitHub Releases](https://github.com/Acercandr0/TinyClock/releases).
